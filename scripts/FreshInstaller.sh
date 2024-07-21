@@ -2,6 +2,7 @@
 #Identify the OS / Distro ############################
 DISTRO=$(cat /etc/*-release | grep -e ^ID | cut -d"=" -f2)
 VERSION_ID=$(cat /etc/*-release | grep -e ^VERSION_ID | cut -d"=" -f2)
+PKGMGR=""
 echo "Distro: $DISTRO"
 echo "Version ID: $VERSION_ID"
 sleep 2
@@ -11,10 +12,10 @@ function FreshInstall () {
 	echo "Entering main Install Function"
 	##
 	function updateupgrade () {
-		echo "Attempting to update Fedora"
+		echo "Attempting to update $DISTRO"
 		sudo dnf clean all
-		sudo dnf update -y
-		sudo dnf -y install dnf-plugins-core
+		sudo $PKGMGR update && sudo $PKGMGR upgrade -y
+		sudo $PKGMGR -y install dnf-plugins-core
 		echo "==========================="
 		echo "==Performing Installations="
 		echo "==========================="
@@ -26,18 +27,18 @@ function FreshInstall () {
 		# ====== RPM Additional Repos Repos ====== #
 		echo "Installing RPM Fusion PreReqs"
 		sleep 2
-		sudo dnf install \
+		sudo $PKGMGR install \
 		https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 
-		sudo dnf install \
+		sudo $PKGMGR install \
 		https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 		
 		echo "Installing Wine PreReqs"
 		sleep 2
-		sudo rpm --import https://dl.winehq.org/wine-builds/winehq.key 
-		sudo dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/$VERSION_ID/winehq.repo
+		sudo $PKGMGR --import https://dl.winehq.org/wine-builds/winehq.key 
+		sudo $PKGMGR config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/$VERSION_ID/winehq.repo
 
-		sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+		sudo $PKGMGR --import https://packages.microsoft.com/keys/microsoft.asc
 		echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null 
 	}
 		### InstallRepos END ###
@@ -71,17 +72,36 @@ function FreshInstall () {
 
 	# ====== Configure Installed Apps ====== #
 	function configApps () {
+		echo "Adding .local/bin to \$PATH"
+		export PATH="$HOME/.local/bin:$PATH"
+
 		echo "Now Configuring Apps..."
-		sleep 2
+		sleep 1
+
+		echo "Creating directories as necessary"
+		echo "neovim: $HOME/.config/nvim"
+		mkdir $HOME/.config/nvim
 		
 		###
 		echo "nvim > kickstart"
-		mkdir $HOME/.config/nvim
 		git clone https://github.com/nvim-lua/kickstart.nvim $HOME/.config/nvim
+
+		echo "installing flatpak remote repos"
+		flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
+		flatpak install us.zoom.Zoom
 
 		###
 		echo "TLDR"
-		tldr -u 
+		tldr -u
+
+		echo "Adding git add-commit alias"
+		echo "Now we can add and commit in one line like this:"
+		echo "\$ git add-commit -m 'message' "
+		git config --global alias.add-commit '!git add -A && git commit'
+
+		echo "Installing gnome-extensions-cli"
+		pip3 install --upgrade gnome-extensions-cli
 	} #configApps END
 	
 # ====== Gnome Extensions ====== #
@@ -114,12 +134,16 @@ fi
 ## Entry Point ##
 if [ "$DISTRO" == "fedora" ]; then
 	echo "This is Fedora; DNF package manager"
+	PKGMGR="dnf"
+	echo "Selecting $PKGMGR as package manager"
+	sleep 1
 	FreshInstall
 
 elif [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "ubuntu" ] ; then
 	echo "This is Debian; APT package manager"
-	echo "Attempting to update"
-	sudo apt update -y
+	PKGMGR="apt"
+	echo "Selecting $PKGMGR as package manager"
+	sleep 1
 fi
 ###################################
 
