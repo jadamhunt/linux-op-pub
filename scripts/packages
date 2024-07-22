@@ -47,3 +47,5 @@ cmatrix
 dpkg
 alien
 flatpak-builder
+bridge-utils
+fzf

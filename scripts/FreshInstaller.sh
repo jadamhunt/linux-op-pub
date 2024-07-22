@@ -90,6 +90,7 @@ function FreshInstall () {
 		flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 		flatpak install us.zoom.Zoom
+		flatpak install org.nickvision.tubeconverter
 
 		###
 		echo "TLDR"
