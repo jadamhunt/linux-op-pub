@@ -103,6 +103,10 @@ function FreshInstall () {
 
 		echo "Installing gnome-extensions-cli"
 		pip3 install --upgrade gnome-extensions-cli
+
+		echo "Adding right-click context options to Nautilus"
+		cp ./VScode.sh /home/jhunt/.local/share/nautilus/scripts/
+
 	} #configApps END
 	
 # ====== Gnome Extensions ====== #
