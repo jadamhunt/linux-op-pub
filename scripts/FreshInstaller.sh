@@ -65,7 +65,7 @@ function FreshInstall () {
 			echo "Only Office Installer Not Found"
 			echo "Downloading OnlyOffice"
 			curl https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors.x86_64.rpm -o ~/Downloads/onlyoffice.rpm
-			rpm -i ~/Downloads/onlyoffice.rpm
+			sudo rpm -i ~/Downloads/onlyoffice.rpm
 		fi
 	}
 	## OnlyOfficeInstall END
@@ -100,6 +100,7 @@ function FreshInstall () {
 		echo "Now we can add and commit in one line like this:"
 		echo "\$ git add-commit -m 'message' "
 		git config --global alias.add-commit '!git add -A && git commit'
+		alias git-add-commit="git config --global alias.add-commit '!git add -A && git commit'"
 
 		echo "Installing gnome-extensions-cli"
 		pip3 install --upgrade gnome-extensions-cli
@@ -133,7 +134,15 @@ echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
 	OnlyOfficeInstall
+
 fi
+read -p "Config Apps (Y/n)" -n 1 -r
+echo    # (optional) move to a new line
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+	configApps
+fi
+
 }
 
 ## Entry Point ##
