@@ -3,30 +3,22 @@
 # Introduction
 # Menu
 
-"==============================================="
+echo "==============================================="
 echo "Welcome to the Foundation Installer Script"
-echo "\t \t Jhunt 2024"
-"==============================================="
+echo -e "\t \t Jhunt 2024"
+echo "==============================================="
 # @TODO replace with carriage return; single line
 echo ""  
-echo ""
-echo ""
-
 DISTRO=$(cat /etc/*-release | grep -e ^ID | cut -d"=" -f2)
 VERSION_ID=$(cat /etc/*-release | grep -e ^VERSION_ID | cut -d"=" -f2)
 PKGMGR=""
 echo "Distro: $DISTRO"
 echo "Version ID: $VERSION_ID"
-
-echo ""
-echo ""
 echo ""
 
 function updateUpgrade () {
 	echo "Attempting to update $DISTRO"
-	sudo dnf clean all
 	sudo $PKGMGR update && sudo $PKGMGR upgrade -y
-	sudo $PKGMGR -y install dnf-plugins-core
 	echo "==========================="
 	echo "==Performing Installations="
 	echo "==========================="
@@ -37,12 +29,15 @@ if [ "$DISTRO" == "fedora" ]; then
 	echo "This is Fedora; DNF package manager"
 	PKGMGR="dnf"
 	echo "Selecting $PKGMGR as package manager"
+	sudo $PKGMGR -y install dnf-plugins-core
+	sudo $PKGMGR clean all
 	sleep 1
 
 elif [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "ubuntu" ] ; then
 	echo "This is Debian; APT package manager"
 	PKGMGR="apt"
 	echo "Selecting $PKGMGR as package manager"
+	sudo $PGKMGR autoremove
 	sleep 1
 fi
 }
@@ -50,34 +45,65 @@ fi
 ########## install_repos ##########
 
 function InstallRepos () {
-	# ====== RPM Additional Repos Repos ====== #
-	echo "Installing RPM Fusion PreReqs"
-	sleep 1
-	sudo $PKGMGR install \
-	https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+	echo "Preparing to Install Repos based on Package Manager $PKGMGR"
 
-	sudo $PKGMGR install \
-	https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+	if [[ $PKGMGR == "dnf" ]]; then
+
+		# ====== RPM Additional Repos Repos ====== #
+		echo "Installing RPM Fusion PreReqs"
+		sleep 1
+		sudo $PKGMGR install \
+		https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+
+		sudo $PKGMGR install \
+		https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+
+		echo "Installing VSCode Repos"
+		sudo $PKGMGR --import https://packages.microsoft.com/keys/microsoft.asc
+		echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null 
 	
-	echo "Installing Wine PreReqs"
-	sleep 1
-	sudo $PKGMGR --import https://dl.winehq.org/wine-builds/winehq.key 
-	sudo $PKGMGR config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/$VERSION_ID/winehq.repo
+elif [[ $PKGMGR == "apt" ]]; then
+		sudo apt-add-repository --component non-free
+		
+		echo "Install VSCode Repos"
+		sudo apt-get install wget gpg
+		wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+		sudo install -D -o root -g root -m 644 packages.microsoft.gpg /etc/apt/keyrings/packages.microsoft.gpg
+		echo "deb [arch=amd64,arm64,armhf signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" |sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+		rm -f packages.microsoft.gpg
+	fi
+
+#	echo "Installing Wine PreReqs"
+#	sleep 1
+#	sudo $PKGMGR --import https://dl.winehq.org/wine-builds/winehq.key 
+#	sudo $PKGMGR config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/$VERSION_ID/winehq.repo
 	
-	echo "Installing VSCode Repos"
-	sudo $PKGMGR --import https://packages.microsoft.com/keys/microsoft.asc
-	echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null 
 }
 
 ########## InstallSoftware ##########
 function InstallSoftware () {
-	#!/bin/bash
-	echo "Installing $(wc -l packages) from package list. "
+	echo "In InstallSoftware() "
+
+	echo "Installing $(wc -l packages) from Univsersal package list. "
 	while read pkg; do
 	echo $pkg
 	sudo dnf install $pkg -y
 	clear
 	done < ./packages 
+		
+	if [[ $PKGMGR == "dnf" ]]; then
+		while read pkg; do
+		echo $pkg
+		sudo dnf install $pkg -y
+		clear
+		done < ./packages_rpm 
+	elif [[ $PKGMGR == "apt" ]]; then
+		while read pkg; do
+		echo $pkg
+		sudo apt install $pkg -y
+		clear
+		done < ./packages_deb
+	fi
 }
 
 ########## OnlyOfficeInstall ##########
@@ -85,16 +111,28 @@ function OnlyOfficeInstall () {
 	# ====== Only Office Install ====== #
 	# # Refactor to move after primary package downloads
 	echo "Checking to see if onlyoffice.rpm exists..."
-	OOinstallFile="onlyoffice.rpm"
-	
+
+	if [[ $PKGMGR == "dnf" ]]; then
+		OOinstallFile="onlyoffice.rpm"
+	elif [[ $PKGMGR == "apt" ]]; then
+		OOinstallFile="onlyoffice.deb"
+	fi
+
 	if [ -f $HOME/Downloads/$OOinstallFile ]; then
 		echo "$OOinstallFile exists, nothing to do"
 	else
 		echo "Only Office Installer Not Found"
 		echo "Downloading OnlyOffice"
-		curl https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors.x86_64.rpm -o ~/Downloads/onlyoffice.rpm
-		sudo rpm -i ~/Downloads/onlyoffice.rpm
+
+		if [[ $PKGMGR == "dnf" ]]; then
+			curl https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors.x86_64.rpm -o ~/Downloads/onlyoffice.rpm
+			sudo rpm -i ~/Downloads/onlyoffice.rpm
+		elif [[ $PKGMGR == "apt" ]]; then
+			curl https://download.onlyoffice.com/install/desktop/editors/linux/onlyoffice-desktopeditors_amd64.deb -o ~/Downloads/onlyoffice.deb
+			sudo dpkg -i ~/Downloads/onlyoffice.deb
+		fi
 	fi
+	
 }
 
 
@@ -130,7 +168,7 @@ function configApps () {
 	flatpak install org.nickvision.tubeconverter
 
 	echo "Installing Proton Pass"
-	flatpak install flathub.me.proton.Pass
+	flatpak install flathub me.proton.Pass
 
 	###
 	echo "Setting up TLDR"
@@ -146,7 +184,7 @@ function configApps () {
 	pip3 install --upgrade gnome-extensions-cli
 
 	echo "Adding right-click context options to Nautilus"
-	cp ./VScode.sh /home/jhunt/.local/share/nautilus/scripts/
+	cp ./VScode.sh $HOME/.local/share/nautilus/scripts/
 } #configApps END
 
 function pathCheck () {
@@ -173,38 +211,41 @@ function display_menu () {
 	echo " 0 - Quit                  "
 	echo "---------------------------"
 	echo "+++++++++++++++++++++++++++"
+
+	read menu_item
+
+	if [[ $menu_item -eq 1 ]]; then
+		package_selector 
+		source ./countdownConfirm.sh
+		read_yn "Are you sure you want Install / Update" "y" 5 updateUpgrade
+
+	elif [[ $menu_item -eq 2 ]]; then
+		source ./countdownConfirm.sh
+		read_yn "Are you sure you want install external repos?" "y" 5 InstallRepos
+
+	elif [[ $menu_item -eq 3 ]]; then
+		echo "Beginning Software Installs"
+		InstallSoftware
+		# source ./countdownConfirm.sh
+		# read_yn "Are your ready to install base software packages" "y" 5 InstallSoftware
+
+
+	elif [[ $menu_item -eq 4 ]]; then
+		source ./countdownConfirm.sh
+		read_yn "Do you want install Only Office" "y" 5 OnlyOfficeInstall
+		
+	elif [[ $menu_item -eq 5 ]]; then
+		source ./countdownConfirm.sh
+		read_yn "Do you want install Only Office" "y" 5 configApps
+
+	else 
+		return 1
+	fi
+
+	display_menu
 }
 
 display_menu
-
-read menu_item
-
-if [ $menu_item -eq 1 ]
-then
-	package_selector 
-	source ./countdownConfirm.sh
-	read_yn "Are you sure you want Install / Update" "y" 5 updateUpgrade
-
-elif [ $menu_tem -eq 2 ]; then
-	source ./countdownConfirm.sh
-	read_yn "Are you sure you want install external repos?" "y" 5 InstallRepos
-
-elif [ $menu_tem -eq 3 ]; then
-	source ./countdownConfirm.sh
-	read_yn "Are your ready to install base software packages" "y" 5 InstallSoftware
-
-elif [ $menu_tem -eq 4 ]; then
-	source ./countdownConfirm.sh
-	read_yn "Do you want install Only Office" "y" 5 OnlyOfficeInstall
-	
-elif [ $menu_tem -eq 5 ]; then
-	source ./countdownConfirm.sh
-	read_yn "Do you want install Only Office" "y" 5 configApps
-else
-	break
-fi
-
-
 echo "Post Installation Notes"
 echo "======================="
 echo "run winecfg"
