@@ -83,13 +83,13 @@ elif [[ $PKGMGR == "apt" ]]; then
 ########## InstallSoftware ##########
 function InstallSoftware () {
 	echo "In InstallSoftware() "
-
 	echo "Installing $(wc -l packages) from Univsersal package list. "
-	while read pkg; do
-	echo $pkg
-	sudo dnf install $pkg -y
-	clear
-	done < ./packages 
+	PKGS=$(cat packages | awk '{print}' ORS=' ')
+	echo $PKGS
+	echo $PKGMGR
+	sudo $PKGMGR install $PKGS 
+	sleep 2
+	# clear
 		
 	if [[ $PKGMGR == "dnf" ]]; then
 		while read pkg; do
@@ -170,6 +170,9 @@ function configApps () {
 	echo "Installing Proton Pass"
 	flatpak install flathub me.proton.Pass
 
+	echo "Installing Impression"
+	flatpak install flathub io.gitlab.adhami3310.Impression
+
 	###
 	echo "Setting up TLDR"
 	tldr -u
@@ -224,6 +227,7 @@ function display_menu () {
 		read_yn "Are you sure you want install external repos?" "y" 5 InstallRepos
 
 	elif [[ $menu_item -eq 3 ]]; then
+		package_selector
 		echo "Beginning Software Installs"
 		InstallSoftware
 		# source ./countdownConfirm.sh
