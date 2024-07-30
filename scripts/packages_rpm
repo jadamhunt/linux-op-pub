@@ -1,3 +1,11 @@
 libX11-devel
 freetype-devel
 gnutls-devel
+libXScrnSaver
+nautilus-dropbox-*
+winetricks
+dejavu-sans-fonts
+qemu
+dejavu-serif-fonts
+boost-filesystem
+steam
