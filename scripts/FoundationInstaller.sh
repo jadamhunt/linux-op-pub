@@ -182,6 +182,9 @@ function configApps () {
 	echo "installing flatpak remote repos"
 	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
+	echo "Installing Flatseal"
+	flatpak install -y flathub com.github.tchx84.Flatseal
+	
 	echo "Installing Parabolic (flatpak)"
 	flatpak install -y us.zoom.Zoom
 	flatpak install -y org.nickvision.tubeconverter
@@ -198,8 +201,8 @@ function configApps () {
 	echo "Installing Extension Manager by Matthew Jakeman"
 	flatpak install -y flathub com.mattjakeman.ExtensionManager
 
-	echo "Installing Flatseal"
-	flatpak install -y flathub com.github.tchx84.Flatseal
+	echo "Installing Brave Browser"
+	flatpak install -y flathub com.brave.Browser
 
 	echo "Installing Steam"
 	flatpak install -y flathub com.valvesoftware.Steam
