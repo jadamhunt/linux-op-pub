@@ -1,10 +1,14 @@
 kitty
+gcc
+cmake
+g++
+cpp
+fakeroot
 lolcat
 python3
 python3-pip
 mc
 ranger
-neovim
 bpytop
 tree
 bat
@@ -26,11 +30,10 @@ keepassxc
 gnome-extensions-app
 pass
 gpg
-dejavu-sans-mono-fonts
-code
 virt-manager
 apostrophe
 flatpak
+flatseal
 cmus
 cmatrix
 dpkg
@@ -41,3 +44,4 @@ fzf
 remmina
 flex
 bison
+meson

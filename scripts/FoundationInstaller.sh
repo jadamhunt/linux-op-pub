@@ -87,7 +87,7 @@ function InstallSoftware () {
 	PKGS=$(cat packages | awk '{print}' ORS=' ')
 	echo $PKGS
 	echo $PKGMGR
-	sudo $PKGMGR install $PKGS 
+	sudo $PKGMGR install $PKGS -y
 	sleep 2
 	# clear
 		
@@ -103,6 +103,8 @@ function InstallSoftware () {
 		sudo apt install $pkg -y
 		clear
 		done < ./packages_deb
+
+
 	fi
 }
 
@@ -135,6 +137,14 @@ function OnlyOfficeInstall () {
 	
 }
 
+function compileNeoVim () {
+	git clone https://github.com/neovim/neovim ~/Downloads/
+	cd ~/Downloads/neovim/
+	make CMAKE_BUILD_TYPE=RelWithDebInfo
+	sudo make install
+	sudo cp ~/Downloads/neovim/build/bin/nvim /usr/bin/
+	sudo chown $USER: /usr/bin/nvim
+}
 
 function configApps () {
 	echo "Adding .local/bin to \$PATH"
@@ -154,24 +164,38 @@ function configApps () {
 	pathCheck d $HOME/.config/kitty
 	echo "========="
 
+	if [[ $PKGMGR == "apt" ]]; then
+		compileNeoVim
+		echo "alias bat='batcat'" >> ~/.bashrc
+	fi
+
 	echo "nvim > kickstart"
 	git clone https://github.com/nvim-lua/kickstart.nvim $HOME/.config/nvim
 	
 	echo "kitty conf > ~/.config/kitty/"
-	cp -r ../configs/kitty/ $HOME/.config/kitty/
+	cp -r ../configs/kitty/ $HOME/.config/
 
+	# ##############################################
+	# Flatpaks
+	# ##############################################
 	echo "installing flatpak remote repos"
 	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 	echo "Installing Parabolic (flatpak)"
-	flatpak install us.zoom.Zoom
-	flatpak install org.nickvision.tubeconverter
+	flatpak install -y us.zoom.Zoom
+	flatpak install -y org.nickvision.tubeconverter
 
 	echo "Installing Proton Pass"
-	flatpak install flathub me.proton.Pass
+	flatpak install -y flathub me.proton.Pass
 
 	echo "Installing Impression"
-	flatpak install flathub io.gitlab.adhami3310.Impression
+	flatpak install -y flathub io.gitlab.adhami3310.Impression
+	
+	echo "Installing VSCode"
+	flatpak install -y flathub com.visualstudio.code
+
+	echo "Installing Extension Manager by Matthew Jakeman"
+	flatpak install -y flathub com.mattjakeman.ExtensionManager
 
 	###
 	echo "Setting up TLDR"
@@ -188,6 +212,10 @@ function configApps () {
 
 	echo "Adding right-click context options to Nautilus"
 	cp ./VScode.sh $HOME/.local/share/nautilus/scripts/
+
+	echo "Installing oh-my-zsh"
+	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 } #configApps END
 
 function pathCheck () {
