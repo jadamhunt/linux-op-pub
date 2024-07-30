@@ -37,7 +37,8 @@ elif [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "ubuntu" ] ; then
 	echo "This is Debian; APT package manager"
 	PKGMGR="apt"
 	echo "Selecting $PKGMGR as package manager"
-	sudo $PGKMGR autoremove
+	sudo $PKGMGR autoremove
+	sudo $PKGMGR autoclean
 	sleep 1
 fi
 }
@@ -138,7 +139,7 @@ function OnlyOfficeInstall () {
 }
 
 function compileNeoVim () {
-	git clone https://github.com/neovim/neovim ~/Downloads/
+	git clone https://github.com/neovim/neovim ~/Downloads/neovim
 	cd ~/Downloads/neovim/
 	make CMAKE_BUILD_TYPE=RelWithDebInfo
 	sudo make install
@@ -197,6 +198,11 @@ function configApps () {
 	echo "Installing Extension Manager by Matthew Jakeman"
 	flatpak install -y flathub com.mattjakeman.ExtensionManager
 
+	echo "Installing Flatseal"
+	flatpak install -y flathub com.github.tchx84.Flatseal
+
+	echo "Installing Steam"
+	flatpak install -y flathub com.valvesoftware.Steam
 	###
 	echo "Setting up TLDR"
 	tldr -u
@@ -251,6 +257,7 @@ function display_menu () {
 		read_yn "Are you sure you want Install / Update" "y" 5 updateUpgrade
 
 	elif [[ $menu_item -eq 2 ]]; then
+		package_selector
 		source ./countdownConfirm.sh
 		read_yn "Are you sure you want install external repos?" "y" 5 InstallRepos
 
@@ -267,6 +274,7 @@ function display_menu () {
 		read_yn "Do you want install Only Office" "y" 5 OnlyOfficeInstall
 		
 	elif [[ $menu_item -eq 5 ]]; then
+		package_selector
 		source ./countdownConfirm.sh
 		read_yn "Do you want install Only Office" "y" 5 configApps
 
