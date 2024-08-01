@@ -16,6 +16,32 @@ echo "Distro: $DISTRO"
 echo "Version ID: $VERSION_ID"
 echo ""
 
+# ##############################################
+# Package Selector 
+# ##############################################
+function package_selector () {
+if [ "$DISTRO" == "fedora" ]; then
+	echo "This is Fedora; DNF package manager"
+	PKGMGR="dnf"
+	echo "Selecting $PKGMGR as package manager"
+	sudo $PKGMGR -y install dnf-plugins-core
+	sudo $PKGMGR clean all
+	sleep 1
+
+elif [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "ubuntu" ] ; then
+	echo "This is Debian; APT package manager"
+	PKGMGR="apt"
+	echo "Selecting $PKGMGR as package manager"
+	sudo $PKGMGR autoremove
+	sudo $PKGMGR autoclean
+	sleep 1
+fi
+}
+package_selector
+
+# ##############################################
+# Update & Upgrade Function 
+# ##############################################
 function updateUpgrade () {
 	echo "Attempting to update $DISTRO"
 	sudo $PKGMGR update && sudo $PKGMGR upgrade -y
@@ -23,7 +49,10 @@ function updateUpgrade () {
 	echo "==Performing Installations="
 	echo "==========================="
 }
-########## package_selector ##########
+
+# ##############################################
+# Package Selector 
+# ##############################################
 function package_selector () {
 if [ "$DISTRO" == "fedora" ]; then
 	echo "This is Fedora; DNF package manager"
@@ -43,14 +72,15 @@ elif [ "$DISTRO" == "debian" ] || [ "$DISTRO" == "ubuntu" ] ; then
 fi
 }
 
-########## install_repos ##########
-
+# ##############################################
+# Install Repos 
+# ##############################################
 function InstallRepos () {
 	echo "Preparing to Install Repos based on Package Manager $PKGMGR"
 
 	if [[ $PKGMGR == "dnf" ]]; then
 
-		# ====== RPM Additional Repos Repos ====== #
+		# ====== RPM Additional Repos ====== #
 		echo "Installing RPM Fusion PreReqs"
 		sleep 1
 		sudo $PKGMGR install \
@@ -63,7 +93,8 @@ function InstallRepos () {
 		sudo $PKGMGR --import https://packages.microsoft.com/keys/microsoft.asc
 		echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null 
 	
-elif [[ $PKGMGR == "apt" ]]; then
+		# ======Debian based Additional Repos ====== #
+	elif [[ $PKGMGR == "apt" ]]; then
 		sudo apt-add-repository --component non-free
 		
 		echo "Install VSCode Repos"
@@ -81,7 +112,9 @@ elif [[ $PKGMGR == "apt" ]]; then
 	
 }
 
-########## InstallSoftware ##########
+# ##############################################
+# Install Software 
+# ##############################################
 function InstallSoftware () {
 	echo "In InstallSoftware() "
 	echo "Installing $(wc -l packages) from Univsersal package list. "
@@ -104,15 +137,13 @@ function InstallSoftware () {
 		sudo apt install $pkg -y
 		clear
 		done < ./packages_deb
-
-
 	fi
 }
 
-########## OnlyOfficeInstall ##########
+# ##############################################
+# Install OnlyOffice 
+# ##############################################
 function OnlyOfficeInstall () {
-	# ====== Only Office Install ====== #
-	# # Refactor to move after primary package downloads
 	echo "Checking to see if onlyoffice.rpm exists..."
 
 	if [[ $PKGMGR == "dnf" ]]; then
@@ -135,8 +166,8 @@ function OnlyOfficeInstall () {
 			sudo dpkg -i ~/Downloads/onlyoffice.deb
 		fi
 	fi
-	
 }
+# ##############################################
 
 function compileNeoVim () {
 	git clone https://github.com/neovim/neovim ~/Downloads/neovim
@@ -147,13 +178,14 @@ function compileNeoVim () {
 	sudo chown $USER: /usr/bin/nvim
 }
 
+# ##############################################
+# Configure Applications
+# ##############################################
 function configApps () {
 	echo "Adding .local/bin to \$PATH"
 	export PATH="$HOME/.local/bin:$PATH"
-
-	# ##############################################
+	
 	# Creating config Directories
-	# ##############################################
 	echo "Now Configuring Apps..."
 	sleep 1
 	
@@ -167,40 +199,35 @@ function configApps () {
 	echo "neovim: $HOME/.config/kitty"
 	pathCheck d $HOME/.config/kitty
 	echo "========="
-	
 	# ##############################################
 
-
+	# Copying ~/.config based configurations
 	echo "nvim > kickstart"
 	git clone https://github.com/nvim-lua/kickstart.nvim $HOME/.config/nvim
-	
+	###
 	echo "kitty conf > ~/.config/kitty/"
 	cp -frv ../configs/kitty/ ~/.config
 
-	# ##############################################
 	# Flatpaks
-	# ##############################################
-	
 	echo "Preparing to install FlatPaks"
 	source install_flatpaks.sh
 	fpInstall
 
-	# #############################################
-
+	# Aliases
 	# @TODO Create alias script
+	# Debian calls bat 'batcat', let's fix this.
 	if [[ $PKGMGR == "apt" ]]; then
 		compileNeoVim
 		echo "alias bat='batcat'" >> ~/.bashrc
 	fi
 	
+	# alias to add a one-liner add/commit to a local git repos
+	alias git-add-commit="git config --global alias.add-commit '!git add -A && git commit'"
+	git config --global alias.add-commit '!git add -A && git commit'
+	#
+	
 	echo "Setting up TLDR"
 	tldr -u
-
-	echo "Adding git add-commit alias"
-	echo "Now we can add and commit in one line like this:"
-	echo "\$ git add-commit -m 'message' "
-	git config --global alias.add-commit '!git add -A && git commit'
-	alias git-add-commit="git config --global alias.add-commit '!git add -A && git commit'"
 
 	echo "Installing gnome-extensions-cli"
 	pip3 install --upgrade gnome-extensions-cli
@@ -210,7 +237,6 @@ function configApps () {
 
 	echo "Installing oh-my-zsh"
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-
 } #configApps END
 
 function pathCheck () {
@@ -241,17 +267,14 @@ function display_menu () {
 	read menu_item
 
 	if [[ $menu_item -eq 1 ]]; then
-		package_selector 
 		source ./countdownConfirm.sh
 		read_yn "Are you sure you want Install / Update" "y" 5 updateUpgrade
 
 	elif [[ $menu_item -eq 2 ]]; then
-		package_selector
 		source ./countdownConfirm.sh
 		read_yn "Are you sure you want install external repos?" "y" 5 InstallRepos
 
 	elif [[ $menu_item -eq 3 ]]; then
-		package_selector
 		echo "Beginning Software Installs"
 		InstallSoftware
 		# source ./countdownConfirm.sh
@@ -263,9 +286,16 @@ function display_menu () {
 		read_yn "Do you want install Only Office" "y" 5 OnlyOfficeInstall
 		
 	elif [[ $menu_item -eq 5 ]]; then
-		package_selector
 		source ./countdownConfirm.sh
 		read_yn "Do you want install Only Office" "y" 5 configApps
+	
+	elif [[ $menu_item -eq 9 ]]; then
+		echo "Let's install it all!"
+		updateUpgrades
+		InstallRepos
+		InstallSoftware
+		OnlyOfficeInstall
+		configApps
 
 	else 
 		return 1

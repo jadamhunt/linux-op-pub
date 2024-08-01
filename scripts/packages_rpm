@@ -6,9 +6,10 @@ libXScrnSaver
 nautilus-dropbox-*
 winetricks
 dejavu-sans-fonts
+liberation-narrow-fonts
 qemu
 dejavu-serif-fonts
 boost-filesystem
-steam
 dejavu-sans-mono-fonts
 xournalpp
+ffpmeg

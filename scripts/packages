@@ -17,7 +17,6 @@ git
 curl
 wget
 lynx
-ffmpeg
 figlet
 easytag
 tldr
