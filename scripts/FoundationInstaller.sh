@@ -291,7 +291,7 @@ function display_menu () {
 	
 	elif [[ $menu_item -eq 9 ]]; then
 		echo "Let's install it all!"
-		updateUpgrades
+		updateUpgrade
 		InstallRepos
 		InstallSoftware
 		OnlyOfficeInstall
