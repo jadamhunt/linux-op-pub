@@ -151,9 +151,12 @@ function configApps () {
 	echo "Adding .local/bin to \$PATH"
 	export PATH="$HOME/.local/bin:$PATH"
 
+	# ##############################################
+	# Creating config Directories
+	# ##############################################
 	echo "Now Configuring Apps..."
 	sleep 1
-
+	
 	echo "Creating directories as necessary:"
 	echo "=========="
 	echo "Installing NeoVim config folder"
@@ -164,49 +167,32 @@ function configApps () {
 	echo "neovim: $HOME/.config/kitty"
 	pathCheck d $HOME/.config/kitty
 	echo "========="
+	
+	# ##############################################
 
-	if [[ $PKGMGR == "apt" ]]; then
-		compileNeoVim
-		echo "alias bat='batcat'" >> ~/.bashrc
-	fi
 
 	echo "nvim > kickstart"
 	git clone https://github.com/nvim-lua/kickstart.nvim $HOME/.config/nvim
 	
 	echo "kitty conf > ~/.config/kitty/"
-	cp -r ../configs/kitty/ $HOME/.config/
+	cp -frv ../configs/kitty/ ~/.config
 
 	# ##############################################
 	# Flatpaks
 	# ##############################################
-	echo "installing flatpak remote repos"
-	flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-
-	echo "Installing Flatseal"
-	flatpak install -y flathub com.github.tchx84.Flatseal
 	
-	echo "Installing Parabolic (flatpak)"
-	flatpak install -y us.zoom.Zoom
-	flatpak install -y org.nickvision.tubeconverter
+	echo "Preparing to install FlatPaks"
+	source install_flatpaks.sh
+	fpInstall
 
-	echo "Installing Proton Pass"
-	flatpak install -y flathub me.proton.Pass
+	# #############################################
 
-	echo "Installing Impression"
-	flatpak install -y flathub io.gitlab.adhami3310.Impression
+	# @TODO Create alias script
+	if [[ $PKGMGR == "apt" ]]; then
+		compileNeoVim
+		echo "alias bat='batcat'" >> ~/.bashrc
+	fi
 	
-	echo "Installing VSCode"
-	flatpak install -y flathub com.visualstudio.code
-
-	echo "Installing Extension Manager by Matthew Jakeman"
-	flatpak install -y flathub com.mattjakeman.ExtensionManager
-
-	echo "Installing Brave Browser"
-	flatpak install -y flathub com.brave.Browser
-
-	echo "Installing Steam"
-	flatpak install -y flathub com.valvesoftware.Steam
-	###
 	echo "Setting up TLDR"
 	tldr -u
 
