@@ -28,6 +28,26 @@ function fpInstall () {
 
 	echo "Installing Steam"
 	flatpak install -y flathub com.valvesoftware.Steam
+
+	echo "Lorem"
+	flatpak install -y flathub org.gnome.design.Lorem
+
+	echo "Cheese"
+	flatpak install -y flathub org.gnome.cheese
+
+	echo "Thunderbird"
+	flatpak install -y flathub org.moizlla.Thunderbird
+
+	echo "PacketTracer"
+	flatpak install -y flathub com.cisco.PacketTracer
+
+	echo "Todoist"
+	flatpak install -y flathub com.todoist.Todoist
+
+	echo "Xournalpp"
+	flatpak install -y flathub com.github.xournalpp.xournalpp
+	
+
 }
 
 fpInstall

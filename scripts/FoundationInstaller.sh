@@ -237,6 +237,12 @@ function configApps () {
 
 	echo "Installing oh-my-zsh"
 	sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
+	if [[ $SHELL == 'usr/bin/zsh'  ]]; then
+		echo "$PATH=~/.local/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin" >> ~/.zshrc
+	else 
+		echo "$PATH=~/.local/bin:/bin:/sbin:/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin" >> ~/.bashrc
+	fi
 } #configApps END
 
 function pathCheck () {
