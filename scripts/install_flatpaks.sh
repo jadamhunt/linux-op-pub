@@ -33,7 +33,7 @@ function fpInstall () {
 	flatpak install -y flathub org.gnome.design.Lorem
 
 	echo "Cheese"
-	flatpak install -y flathub org.gnome.cheese
+	flatpak install -y flathub org.gnome.Cheese
 
 	echo "Thunderbird"
 	flatpak install -y flathub org.moizlla.Thunderbird
