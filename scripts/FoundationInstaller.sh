@@ -89,6 +89,17 @@ function InstallRepos () {
 		sudo $PKGMGR install \
 		https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
 
+		sudo $PGKMGR group update core
+		
+		# Multimedia Codecs
+		sudo dnf swap ffmpeg-free ffmpeg --allowerasing
+		
+		sudo dnf update @multimedia --setopt="install_weak_deps=False" --exclude=PackageKit-gstreamer-plugin
+
+		sudo dnf update @sound-and-video
+		sudo dnf swap mesa-va-drivers mesa-va-drivers-freeworld
+		sudo dnf swap mesa-vdpau-drivers mesa-vdpau-drivers-freeworld
+
 		echo "Installing VSCode Repos"
 		sudo $PKGMGR --import https://packages.microsoft.com/keys/microsoft.asc
 		echo -e "[code]\nname=Visual Studio Code\nbaseurl=https://packages.microsoft.com/yumrepos/vscode\nenabled=1\ngpgcheck=1\ngpgkey=https://packages.microsoft.com/keys/microsoft.asc" | sudo tee /etc/yum.repos.d/vscode.repo > /dev/null 
