@@ -15,3 +15,5 @@ xournalpp
 ffpmeg
 firewall-config
 bat
+wine-devices
+NetworkManager-tui

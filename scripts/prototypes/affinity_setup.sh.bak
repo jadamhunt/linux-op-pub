@@ -1,0 +1,59 @@
+#!/bin/bash
+
+echo "Cloning ElmentalWarrior wine repo"
+cd ~/Documents/
+git clone https://gitlab.winehq.org/ElementalWarrior/wine.git ElementalWarrior-wine
+
+echo "making build directories"
+cd ~/Documents/ElementalWarrior-wine/
+mkdir wine32-build/ wine64-build/ wine-install/
+
+echo "Installing Wine Prereqs"
+./packages_wine.sh
+
+echo "building x64 - this will take a LONG time"
+cd ~/Documents/ElementalWarrior-wine/wine64-build/
+$HOME/Documents/ElementalWarrior-wine/configure --prefix=$HOME/Documents/ElementalWarrior-wine/wine-install --enable-win64
+# make
+make -j 6
+
+echo "building x86 - this will take a LONG time"
+cd $HOME/Documents/ElementalWarrior-wine/wine32-build/
+PKG_CONFIG_PATH=/usr/lib32/pkgconfig /$HOME/Documents/ElementalWarrior-wine/configure --with-wine64=/$HOME/Documents/ElementalWarrior-wine/wine64-build --prefix=$HOME/Documents/ElementalWarrior-wine/wine-install
+# make
+make -j 6
+
+echo "make install -x86"
+make install
+
+echo "make install -x64"
+cd $HOME/Documents/ElementalWarrior-wine/wine64-build/
+make install
+
+echo "Getting rum Wine enviroment"
+cd ~/Documents/
+git clone https://gitlab.com/xkero/rum
+
+sudo cp ./rum/rum /bin/rum
+echo "Rum is now runnable binary (/bin/rum)"
+
+echo "Preparing prefixes /opt/wines"
+sudo mkdir /opt/wines
+sudo cp -r ~/Documents/ElementalWarrior-wine/wine-install/ /opt/wines/ElementalWarrior-8.3
+
+echo "Setting up winetrick prefix, dotnet 4.8, and core fonts - chaning prefix to win11"
+rum ElementalWarrior-8.3 $HOME/.WineAffinity winetricks dotnet48 corefonts
+# Trying running as windows 10 prefix, line originally read:
+# rum ElementalWarrior-8.3 $HOME/.WineAffinity wine winecfg -v win11
+rum ElementalWarrior-8.3 $HOME/.WineAffinity wine winecfg -v win10
+
+echo "Adding WinMeta Data to prefix drive"
+tar xzvf ./WinMetadata.tar.gz -C $HOME/.WineAffinitiy/drive_c/windows/system32
+# run any Affinity 2.0.4 msi, and install via rum - where is the msi?
+#rum ElementalWarrior-8.3 "$HOME/.WineAffinity" wine "Path-to-Installer.msi-2.0.4.exe"
+rum ElementalWarrior-8.3 $HOME/.WineAffinity/ wine ~/Downloads/affinity-photo-msi-2.5.3.exe
+# rum ElementalWarrior-8.3 $HOME/.WineAffinity wine $HOME/.WineAffinity/drive_c/Program Files/Affinity/Designer 2/Designer.exe
+
+# rum ElementalWarrior-8.3 "/home/USER/.WineAffinity" wine "/home/USER/.WineAffinity/drive_c/Program Files/Affinity/Photo 2/Photo.exe
+
+# rum ElementalWarrior-8.3 "/home/USER/.WineAffinity" wine "/home/USER/.WineAffinity/drive_c/Program Files/Affinity/Publisher 2/Publisher.exe

@@ -36,7 +36,7 @@ function fpInstall () {
 	flatpak install -y flathub org.gnome.Cheese
 
 	echo "Thunderbird"
-	flatpak install -y flathub org.moizlla.Thunderbird
+	flatpak install -y flathub org.mozilla.Thunderbird
 
 	echo "PacketTracer"
 	flatpak install -y flathub com.cisco.PacketTracer
@@ -46,8 +46,19 @@ function fpInstall () {
 
 	echo "Xournalpp"
 	flatpak install -y flathub com.github.xournalpp.xournalpp
-	
 
+	echo "SpeechNote"
+	flatpak install -y flathub net.mkiol.SpeechNote
+
+	echo "Smile emoji picker"
+	flatpak install -y flathub it.mijorus.smile
+
+	echo "SpeechNote GPU Acceleration"
+
+	echo "AMD"
+	flatpak install -y flathub net.mkiol.SpeechNote.Addon.amd
+#	echo "Nvidia"
+#	flatpak install -y flathub net.mkiol.SpeechNote.Addon.nvidia
 }
 
 fpInstall
