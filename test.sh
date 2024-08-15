@@ -4,5 +4,4 @@ gc() {
 	git add -A && git commit -m "$1" 
 }
 
-
 gc "test" 
