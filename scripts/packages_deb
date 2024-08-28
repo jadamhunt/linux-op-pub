@@ -13,3 +13,5 @@ network-manager
 ufw
 wine-devices
 xournalpp
+openvpn
+network-manager-openvpn-gnome

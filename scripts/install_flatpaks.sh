@@ -47,16 +47,16 @@ function fpInstall () {
 	echo "Xournalpp"
 	flatpak install -y flathub com.github.xournalpp.xournalpp
 
-	echo "SpeechNote"
-	flatpak install -y flathub net.mkiol.SpeechNote
+#	echo "SpeechNote"
+#	flatpak install -y flathub net.mkiol.SpeechNote
 
 	echo "Smile emoji picker"
 	flatpak install -y flathub it.mijorus.smile
 
-	echo "SpeechNote GPU Acceleration"
+#	echo "SpeechNote GPU Acceleration"
 
-	echo "AMD"
-	flatpak install -y flathub net.mkiol.SpeechNote.Addon.amd
+#	echo "AMD"
+#	flatpak install -y flathub net.mkiol.SpeechNote.Addon.amd
 #	echo "Nvidia"
 #	flatpak install -y flathub net.mkiol.SpeechNote.Addon.nvidia
 }
