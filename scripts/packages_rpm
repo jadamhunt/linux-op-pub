@@ -17,3 +17,6 @@ firewall-config
 bat
 wine-devices
 NetworkManager-tui
+openvpn
+NetworkManager-openvpn
+NetowrkManager-openvpn-gnome
