@@ -21,8 +21,7 @@ function FindShell () {
 
 aliases=(	'alias ll="ls -alkh"',\ 
 		'alias deldir="rm -rf"',\
-		"alias git-add-commit=\"git config --global alias.add-commit '!git add -A && git commit' \"" ,\
-		'alias ff="fzf --preview \"bat --color=always {}\""'
+		"alias git-add-commit=\"git config --global alias.add-commit '!git add -A && git commit' \""\
 	)
 
 FindShell

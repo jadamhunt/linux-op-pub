@@ -17,6 +17,9 @@ function fpInstall () {
 	echo "Installing Impression"
 	flatpak install -y flathub io.gitlab.adhami3310.Impression
 	
+	echo "Installing Obsidian"
+	flatpak install flathub md.obsidian.Obsidian
+
 	echo "Installing VSCode"
 	flatpak install -y flathub com.visualstudio.code
 

@@ -2,7 +2,7 @@
 yet to be converted to scripts
 ---
 
-## Adding Right-click context to Gnome
+### Adding Right-click context to Gnome
 
   * Create a script in: ```~/.local/share/nautilus/scripts/```
 
@@ -18,7 +18,7 @@ yet to be converted to scripts
 
 ---
 
-## Code Explanation 
+##### Code Explanation 
 
 Second line: ```code -n ${NAUTILUS_SCRIPT_SELECTED_FILE_PATHS}``` 
 
@@ -30,4 +30,21 @@ The variable ```NAUTILUS_SCRIPT_SELECTED_FILE_PATHS``` is defined by nautilus, l
   1. NAUTILUS_SCRIPT_SELECTED_URIS   : newline-delimited URIs for selected files
   2. NAUTILUS_SCRIPT_CURRENT_URI     : current location
   3. NAUTILUS_SCRIPT_WINDOW_GEOMETRY : position and size of current window
-```
+``` 
+---
+### Setting Python Virtual Environments (venv)
+  - Create a virtual environment in the current location (Basic):
+    - ```Python3 -m venv . ``` 
+  - Activate the virtual environment with:
+    - ```source ./bin/activate ``` 
+  - Deactivate with:
+    - ```deactivate ``` 
+---
+
+  - Create a virtual environment in the current location (Named):
+    - ```virtualenv *environment_name* ``` 
+  - Activate the virtual environment with:
+    - ```source .*envrionment_name*/bin/activate ``` 
+  - Deactivate with:
+    - ```deactivate ``` 
+

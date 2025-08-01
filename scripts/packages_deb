@@ -15,3 +15,5 @@ wine-devices
 xournalpp
 openvpn
 network-manager-openvpn-gnome
+libgl1-mesa-glx
+libxcb-xinerama0-dev
